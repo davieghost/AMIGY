@@ -16,13 +16,7 @@ protocol AnalogControlPositionChange {
 
 class AnalogControl: UIView {
 
-    /*
-    // Only override drawRect: if you perform custom drawing.
-    // An empty implementation adversely affects performance during animation.
-    override func drawRect(rect: CGRect) {
-        // Drawing code
-    }
-    */
+  ///////////////// PROPERTIES //////////////////
   
   let baseCenter: CGPoint
   let knobImageView: UIImageView
@@ -31,14 +25,19 @@ class AnalogControl: UIView {
   
   var delegate: AnalogControlPositionChange?
   
+  /////////////// INITIALIZATION ///////////////
+  
   override init(frame viewFrame: CGRect) {
     
     baseCenter = CGPoint(x: viewFrame.size.width / 2,
                          y: viewFrame.size.height / 2)
     
     knobImageView = UIImageView(image: UIImage(named: "knob"))
-    knobImageView.frame.size.width /= 2
-    knobImageView.frame.size.height /= 2
+    
+//    knobImageView.frame.size.width /= 2
+//    knobImageView.frame.size.height /= 2
+    knobImageView.frame.size = CGSize(width: 50, height: 50)
+    
     knobImageView.center = baseCenter
     
     super.init(frame: viewFrame)
@@ -58,8 +57,10 @@ class AnalogControl: UIView {
     fatalError("NSCoding not supported")
   }
   
+  //////////////// UPDATE KNOB POSITION //////////////
+  
   func updateKnobWithPosition(position:CGPoint) {
-    //1
+
     var positionToCenter = position - baseCenter
     var direction: CGPoint
     
@@ -69,18 +70,16 @@ class AnalogControl: UIView {
       direction = positionToCenter.normalized()
     }
     
-    //2
     let radius = frame.size.width/2
     var length = positionToCenter.length()
     
-    //3
     if length > radius {
       length = radius
       positionToCenter = direction * radius
     }
     
     let relPosition = CGPoint(x: direction.x * (length/radius),
-      y: direction.y * (length/radius))
+                              y: direction.y * (length/radius))
     
     knobImageView.center = baseCenter + positionToCenter
     relativePosition = relPosition
@@ -89,6 +88,8 @@ class AnalogControl: UIView {
       position: relativePosition)
     
   }
+  
+  ///////////////// TOUCH HANDLERS ///////////////
   
   override func touchesBegan(touches: NSSet,
     withEvent event: UIEvent) {
