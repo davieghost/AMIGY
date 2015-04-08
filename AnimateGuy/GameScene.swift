@@ -15,7 +15,8 @@ class GameScene: SKScene, AnalogControlPositionChange {
   var dt: NSTimeInterval = 0
   
   // area bounds
-  let playableRect: CGRect
+  var playableRect: CGRect!
+  var backgroundLayer: SKSpriteNode!
   
   // character
   let man = SKSpriteNode(imageNamed: "man1.png")
@@ -28,9 +29,9 @@ class GameScene: SKScene, AnalogControlPositionChange {
   // debugging
   let debugOn = false
   
-  ////////////////// INITIALIZATION ////////////////
+  //////////////// DID MOVE TO VIEW /////////////////
   
-  override init(size: CGSize) {
+  override func didMoveToView(view: SKView) {
     
     // set up playableRect
     let maxAspectRatio: CGFloat = 16.0 / 9.0
@@ -38,34 +39,18 @@ class GameScene: SKScene, AnalogControlPositionChange {
     let playableMargin = (size.height - playableHeight) / 2.0
     playableRect = CGRect(x: 0, y: playableMargin, width: size.width, height: playableHeight)
     
-    // set up manTextures for animation
-    for i in 1...3 {
-      manTextures.append(SKTexture(imageNamed: "man\(i)"))
-    }
-    
-    super.init(size: size)
-    
-    manAnimation = getAnimation()
-  }
-  
-  required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-  
-  //////////////// DID MOVE TO VIEW /////////////////
-  
-  override func didMoveToView(view: SKView) {
-    
     // set up edge loop
     let physicsRect = CGRect(x: 0, y: playableRect.minY + 10, width: playableRect.width, height: 3 * playableRect.height)
     physicsBody = SKPhysicsBody(edgeLoopFromRect: physicsRect)
     
     // set up background
-    let background = SKSpriteNode(imageNamed: "background1")
-    background.size = size
-    background.anchorPoint = CGPointZero
-    background.position = CGPointZero
-    addChild(background)
+//    let background = SKSpriteNode(imageNamed: "background1")
+//    background.size = size
+//    background.anchorPoint = CGPointZero
+//    background.position = CGPointZero
+//    addChild(background)
+    
+    backgroundLayer = childNodeWithName("backgroundLayer") as SKSpriteNode
     
     // set up man
     man.setScale(manScale)
@@ -74,6 +59,15 @@ class GameScene: SKScene, AnalogControlPositionChange {
     addChild(man)
     man.physicsBody = SKPhysicsBody(rectangleOfSize: man.size)
     man.physicsBody?.restitution = 0.0
+    
+    // set up manTextures for animation
+    for i in 1...3 {
+      manTextures.append(SKTexture(imageNamed: "man\(i)"))
+    }
+    
+    
+    
+    manAnimation = getAnimation()
     
     if debugOn { debugDrawPlayableArea(view) }
   }
@@ -116,6 +110,14 @@ class GameScene: SKScene, AnalogControlPositionChange {
   func moveSprite(sprite: SKSpriteNode, velocity: CGPoint) {
     let amountToMove = velocity * CGFloat(dt)
     sprite.position += amountToMove
+    
+    // adjust background
+    if (sprite.position.x > self.frame.width / 2.0 && backgroundLayer.position.x > -1014) ||
+       (sprite.position.x < self.frame.width / 4.0 && backgroundLayer.position.x < -10) {
+      println("moving background")
+      backgroundLayer.position.x -= amountToMove.x
+      sprite.position.x -= amountToMove.x
+    }
   }
   
   //////////////////////////// MAN ////////////////////////////
@@ -179,12 +181,11 @@ class GameScene: SKScene, AnalogControlPositionChange {
   func analogControlPositionChanged(analogControl: AnalogControl, position: CGPoint) {
     
     // turn the guy upright
-//    if position.y > 0.5 {
-//      man.zRotation = CGFloat(0)
-//      velocity = CGPointZero
-//      stopAnimation()
-//      return
-//    }
+    if position.y > 0.5 {
+      man.zRotation = CGFloat(0)
+      velocity = CGPointZero
+      stopAnimation()
+    }
     
     if position.y > 0.5 {
       if !crouched {
