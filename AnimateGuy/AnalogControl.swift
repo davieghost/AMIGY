@@ -8,7 +8,6 @@
 
 import UIKit
 
-
 protocol AnalogControlPositionChange {
   func analogControlPositionChanged(
     analogControl: AnalogControl, position: CGPoint)
@@ -46,8 +45,8 @@ class AnalogControl: UIView {
     
     let baseImageView = UIImageView(frame: bounds)
     baseImageView.image = UIImage(named: "base")
-    addSubview(baseImageView)
     
+    addSubview(baseImageView)
     addSubview(knobImageView)
     
     assert(CGRectContainsRect(bounds, knobImageView.bounds), "Analog control should be larger than the knob in size")
@@ -59,18 +58,11 @@ class AnalogControl: UIView {
   
   //////////////// UPDATE KNOB POSITION //////////////
   
-  func updateKnobWithPosition(position:CGPoint) {
+  func updateKnobWithPosition(position: CGPoint) {
 
     var positionToCenter = position - baseCenter
-    var direction: CGPoint
-    
-    if positionToCenter == CGPointZero {
-      direction = CGPointZero
-    } else {
-      direction = positionToCenter.normalized()
-    }
-    
-    let radius = frame.size.width/2
+    let direction = positionToCenter == CGPointZero ? CGPointZero : positionToCenter.normalized()
+    let radius = frame.size.width / 2
     var length = positionToCenter.length()
     
     if length > radius {
@@ -84,38 +76,26 @@ class AnalogControl: UIView {
     knobImageView.center = baseCenter + positionToCenter
     relativePosition = relPosition
     
-    delegate?.analogControlPositionChanged(self,
-      position: relativePosition)
-    
+    delegate?.analogControlPositionChanged(self, position: relativePosition)
   }
   
   ///////////////// TOUCH HANDLERS ///////////////
   
-  override func touchesBegan(touches: NSSet,
-    withEvent event: UIEvent) {
-      
-      let touchLocation = touches.anyObject()!.locationInView(self)
-      updateKnobWithPosition(touchLocation)
+  override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+    let touchLocation = touches.anyObject()!.locationInView(self)
+    updateKnobWithPosition(touchLocation)
   }
   
-  override func touchesMoved(touches: NSSet,
-    withEvent event: UIEvent) {
-      
-      let touchLocation = touches.anyObject()!.locationInView(self)
-      updateKnobWithPosition(touchLocation)
+  override func touchesMoved(touches: NSSet, withEvent event: UIEvent) {
+    let touchLocation = touches.anyObject()!.locationInView(self)
+    updateKnobWithPosition(touchLocation)
   }
   
-  override func touchesEnded(touches: NSSet,
-    withEvent event: UIEvent) {
-      
-      updateKnobWithPosition(baseCenter)
+  override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
+    updateKnobWithPosition(baseCenter)
   }
   
-  override func touchesCancelled(touches: NSSet,
-    withEvent event: UIEvent) {
-      
-      updateKnobWithPosition(baseCenter)
+  override func touchesCancelled(touches: NSSet, withEvent event: UIEvent) {
+    updateKnobWithPosition(baseCenter)
   }
-
-  
 }

@@ -14,19 +14,17 @@ class GameScene: SKScene, AnalogControlPositionChange {
   var lastUpdateTime: NSTimeInterval = 0
   var dt: NSTimeInterval = 0
   
-  // character
-  let man = SKSpriteNode(imageNamed: "man1.png")
-  
-  // animation
-  var manAnimation: SKAction!
-  var manTextures: [SKTexture] = []
-  var manScale = CGFloat(0.5)
-  var velocity = CGPointZero
-  let manRotateRadiansPerSec: CGFloat = 4.0 * CGFloat(M_PI)
-
   // area bounds
   let playableRect: CGRect
   
+  // character
+  let man = SKSpriteNode(imageNamed: "man1.png")
+  var manScale = CGFloat(0.5)
+  var velocity = CGPointZero
+  var manAnimation: SKAction!
+  var manTextures: [SKTexture] = []
+  var crouched = false
+
   // debugging
   let debugOn = false
   
@@ -40,14 +38,14 @@ class GameScene: SKScene, AnalogControlPositionChange {
     let playableMargin = (size.height - playableHeight) / 2.0
     playableRect = CGRect(x: 0, y: playableMargin, width: size.width, height: playableHeight)
     
-    // set up animation
+    // set up manTextures for animation
     for i in 1...3 {
       manTextures.append(SKTexture(imageNamed: "man\(i)"))
     }
     
     super.init(size: size)
     
-    manAnimation = getAnimation(10)
+    manAnimation = getAnimation()
   }
   
   required init(coder aDecoder: NSCoder) {
@@ -59,13 +57,8 @@ class GameScene: SKScene, AnalogControlPositionChange {
   override func didMoveToView(view: SKView) {
     
     // set up edge loop
-//    let rect = CGRect(x: playableRect.origin.x,
-//      y: playableRect.origin.y + 0.1 * playableRect.height,
-//      width: playableRect.size.width,
-//      height: playableRect.size.height * 3)
-    physicsBody = SKPhysicsBody(edgeLoopFromRect: playableRect)
-    
-    backgroundColor = SKColor.whiteColor()
+    let physicsRect = CGRect(x: 0, y: playableRect.minY + 10, width: playableRect.width, height: 3 * playableRect.height)
+    physicsBody = SKPhysicsBody(edgeLoopFromRect: physicsRect)
     
     // set up background
     let background = SKSpriteNode(imageNamed: "background1")
@@ -74,6 +67,7 @@ class GameScene: SKScene, AnalogControlPositionChange {
     background.position = CGPointZero
     addChild(background)
     
+    // set up man
     man.setScale(manScale)
     man.position = CGPoint(x: 400, y: 240)
     man.zPosition = 100
@@ -92,6 +86,7 @@ class GameScene: SKScene, AnalogControlPositionChange {
     dt = lastUpdateTime > 0 ? currentTime - lastUpdateTime : dt
     lastUpdateTime = currentTime
     
+    // turn the man in the right direction (if he isn't jumping)
     if man.actionForKey("jumping") == nil {
       if velocity.x < 0 {
         man.xScale = -1 * manScale
@@ -100,6 +95,7 @@ class GameScene: SKScene, AnalogControlPositionChange {
       }
     }
     
+    // move the man
     moveSprite(man, velocity: velocity)
   }
   
@@ -109,11 +105,10 @@ class GameScene: SKScene, AnalogControlPositionChange {
 //    let touch = touches.anyObject() as UITouch
 //    let touchLocation = touch.locationInNode(self)
 //    sceneTouched(touchLocation)
-    //jump()
   }
   
   func sceneTouched(touchLocation: CGPoint) {
-    moveToward(touchLocation)
+//    moveToward(touchLocation)
   }
   
   //////////////////////////// GENERAL SPRITE MOVEMENT ////////////////////////////
@@ -125,11 +120,11 @@ class GameScene: SKScene, AnalogControlPositionChange {
   
   //////////////////////////// MAN ////////////////////////////
   
-  func moveToward(location: CGPoint) {
-    let direction = location.x - man.position.x
-    velocity = CGPoint(x: direction, y: 0)
-    
-    startAnimation()
+  // ANIMATION FUNCTIONS
+  func getAnimation() -> SKAction {
+    let time = 0.2
+    return SKAction.repeatActionForever(
+      SKAction.animateWithTextures(manTextures, timePerFrame: time))
   }
   
   func startAnimation() {
@@ -145,45 +140,77 @@ class GameScene: SKScene, AnalogControlPositionChange {
     man.texture = SKTexture(imageNamed: "man1")
   }
   
-  func getAnimation(speed: NSTimeInterval) -> SKAction {
-    let time = 0.2
-    return SKAction.repeatActionForever(
-      SKAction.animateWithTextures(manTextures, timePerFrame: time))
+  // MOVE
+  func moveToward(location: CGPoint) {
+    let direction = location.x - man.position.x
+    velocity = CGPoint(x: direction, y: 0)
+    
+    startAnimation()
   }
-  
+
+  // JUMP
   func jump() {
     man.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 1200))
     
-    let rotationDirection = man.xScale > 0 ? CGFloat(-4 * M_PI) : CGFloat(4 * M_PI)
+    let airRotations = 2.0
     let duration = 1.0
+    
+    let rotationDirection = man.xScale > 0 ? CGFloat(-2 * airRotations * M_PI) : CGFloat(2 * airRotations * M_PI)
     let rotate = SKAction.rotateByAngle(rotationDirection, duration: duration)
     let shrink = SKAction.sequence([
       SKAction.scaleBy(0.5, duration: duration / 2),
       SKAction.scaleBy(2.0, duration: duration / 2)])
-    
     let rotateAndShrink = SKAction.group([rotate, shrink])
-    
     man.runAction(rotateAndShrink, withKey: "jumping")
   }
   
-  ///////////////// CONTROLS ///////////////////
+  func crouch() {
+    crouched = true
+    man.yScale *= 0.5
+  }
+  
+  func uncrouch() {
+    crouched = false
+    man.yScale *= 2.0
+  }
+  
+  ///////////////// CONTROL PAD ///////////////////
   
   func analogControlPositionChanged(analogControl: AnalogControl, position: CGPoint) {
-  //  println("The point is \(position)")
-  
-      if position.x == 0 {
-        velocity.x = 0
-        stopAnimation()
-      } else {
-        velocity.x = 500 * position.x
-        startAnimation()
-      }
     
-      if man.actionForKey("jumping") == nil {
-        if position.y < -0.5 {
-          jump()
-        }
+    // turn the guy upright
+//    if position.y > 0.5 {
+//      man.zRotation = CGFloat(0)
+//      velocity = CGPointZero
+//      stopAnimation()
+//      return
+//    }
+    
+    if position.y > 0.5 {
+      if !crouched {
+        crouch()
       }
+    } else {
+      if crouched {
+        uncrouch()
+      }
+    }
+    
+    // x-axis motion
+    if abs(position.x) < 0.1 {
+      velocity.x = 0
+      stopAnimation()
+    } else {
+      velocity.x = 500 * position.x
+      startAnimation()
+    }
+  
+    // jumping
+    if man.actionForKey("jumping") == nil {
+      if position.y < -0.5 {
+        jump()
+      }
+    }
   }
   
   ////////////////// DEBUGGING //////////////////

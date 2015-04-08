@@ -14,34 +14,18 @@ class GameViewController: UIViewController {
   var analogControl: AnalogControl!
   
   override func viewDidLoad() {
-    
     super.viewDidLoad()
+    
     let skView = self.view as SKView
-    
-    // ...........................................................
-    
-    // makes the scene the size of the view (regardless of device)
-    // can't depend on a regular coordinate system
-    // images DON'T scale
-    // let scene = GameScene(size: skView.bounds.size)
-    
-    // makes the view a fixed size
-    // regular coordinate system across devices
-    // images scale
     let scene = GameScene(size: CGSize(width: 1024, height: 768))
-    
-    // ...........................................................
     
     // retain aspect ratio across devices
     scene.scaleMode = .AspectFill
     
-    // set gravity to zero (just for the first couple seconds)
-    //  scene.physicsWorld.gravity = CGVector(dx: 0, dy: 0)
-    
     // debugging
-    //    skView.showsFPS = true
-    //    skView.showsNodeCount = true
-    //    skView.showsPhysics = true
+//    skView.showsFPS = true
+//    skView.showsNodeCount = true
+//    skView.showsPhysics = true
     
     // an optimization
     skView.ignoresSiblingOrder = true
@@ -49,15 +33,16 @@ class GameViewController: UIViewController {
     // show the scene
     skView.presentScene(scene)
     
+    // add control pad
     let padSide: CGFloat = view.frame.size.height / 4
     let padPadding: CGFloat = view.frame.size.height / 32
+    let padFrame = CGRect(x: padPadding,
+                          y: skView.frame.size.height - padPadding - padSide,
+                          width: padSide,
+                          height: padSide)
     
-    analogControl = AnalogControl(frame: CGRectMake(padPadding,
-      skView.frame.size.height - padPadding - padSide,
-      padSide, padSide))
-    
+    analogControl = AnalogControl(frame: padFrame)
     view.addSubview(analogControl)
-    
     analogControl.delegate = scene
   }
   
