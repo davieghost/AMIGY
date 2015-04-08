@@ -8,7 +8,7 @@
 
 import SpriteKit
 
-class GameScene: SKScene, AnalogControlPositionChange {
+class GameScene: SKScene, AnalogControlPositionChange, ButtonPress {
   
   // loop timing
   var lastUpdateTime: NSTimeInterval = 0
@@ -112,9 +112,9 @@ class GameScene: SKScene, AnalogControlPositionChange {
     sprite.position += amountToMove
     
     // adjust background
-    if (sprite.position.x > self.frame.width / 2.0 && backgroundLayer.position.x > -1014) ||
-       (sprite.position.x < self.frame.width / 4.0 && backgroundLayer.position.x < -10) {
-      println("moving background")
+    if (sprite.position.x > self.frame.width / 2.0 && backgroundLayer.position.x > -924) ||
+       (sprite.position.x < self.frame.width / 4.0 && backgroundLayer.position.x < -100) {
+        
       backgroundLayer.position.x -= amountToMove.x
       sprite.position.x -= amountToMove.x
     }
@@ -168,12 +168,12 @@ class GameScene: SKScene, AnalogControlPositionChange {
   
   func crouch() {
     crouched = true
-    man.yScale *= 0.5
+    man.yScale /= 2
   }
   
   func uncrouch() {
     crouched = false
-    man.yScale *= 2.0
+    man.yScale *= 2
   }
   
   ///////////////// CONTROL PAD ///////////////////
@@ -211,6 +211,15 @@ class GameScene: SKScene, AnalogControlPositionChange {
       if position.y < -0.5 {
         jump()
       }
+    }
+  }
+  
+  ///////////////// BUTTONS /////////////////////
+  
+  func buttonPressed(buttonControl: ButtonControl, buttonLetter: Character) {
+   // println("Button pressed = \(buttonLetter)")
+    if man.actionForKey("jumping") == nil {
+      jump()
     }
   }
   

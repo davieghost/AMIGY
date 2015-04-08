@@ -12,6 +12,7 @@ import SpriteKit
 class GameViewController: UIViewController {
   
   var analogControl: AnalogControl!
+  var buttonControl: ButtonControl!
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -26,7 +27,7 @@ class GameViewController: UIViewController {
       // debugging
   //    skView.showsFPS = true
   //    skView.showsNodeCount = true
-  //    skView.showsPhysics = true
+      skView.showsPhysics = true
       
       // an optimization
       skView.ignoresSiblingOrder = true
@@ -45,6 +46,18 @@ class GameViewController: UIViewController {
       analogControl = AnalogControl(frame: padFrame)
       view.addSubview(analogControl)
       analogControl.delegate = scene
+        
+      // add A button
+      let buttonSide: CGFloat = view.frame.size.height / 8
+      let buttonPadding: CGFloat = view.frame.size.height / 8
+      let buttonFrame = CGRect(x: skView.frame.size.width - buttonPadding - buttonSide,
+                               y: skView.frame.size.height - buttonPadding - buttonSide,
+                               width: buttonSide,
+                               height: buttonSide)
+      buttonControl = ButtonControl(frame: buttonFrame)
+      buttonControl.buttonLetter = "A"
+      view.addSubview(buttonControl)
+      buttonControl.delegate = scene
     }
   }
   

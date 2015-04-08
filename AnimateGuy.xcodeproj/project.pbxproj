@@ -34,6 +34,8 @@
 		298660FA1AD4637B00807E5E /* knob@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 298660F91AD4637B00807E5E /* knob@2x.png */; };
 		298660FC1AD4642200807E5E /* AnalogControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 298660FB1AD4642200807E5E /* AnalogControl.swift */; };
 		298661001AD4797300807E5E /* background1.png in Resources */ = {isa = PBXBuildFile; fileRef = 298660FF1AD4797300807E5E /* background1.png */; };
+		29CA2AD01AD572F700E69F87 /* a_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 29CA2ACF1AD572F700E69F87 /* a_button.png */; };
+		29CA2AD21AD573D100E69F87 /* ButtonControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29CA2AD11AD573D100E69F87 /* ButtonControl.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -78,6 +80,8 @@
 		298660F91AD4637B00807E5E /* knob@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "knob@2x.png"; sourceTree = "<group>"; };
 		298660FB1AD4642200807E5E /* AnalogControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalogControl.swift; sourceTree = "<group>"; };
 		298660FF1AD4797300807E5E /* background1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = background1.png; sourceTree = "<group>"; };
+		29CA2ACF1AD572F700E69F87 /* a_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = a_button.png; sourceTree = "<group>"; };
+		29CA2AD11AD573D100E69F87 /* ButtonControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ButtonControl.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,6 +134,7 @@
 				297026C81AD4478C007789FD /* Images.xcassets */,
 				297026CA1AD4478C007789FD /* LaunchScreen.xib */,
 				297026BB1AD4478C007789FD /* Supporting Files */,
+				29CA2AD11AD573D100E69F87 /* ButtonControl.swift */,
 			);
 			path = AnimateGuy;
 			sourceTree = "<group>";
@@ -192,12 +197,21 @@
 		298660F61AD4635600807E5E /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				29CA2ACE1AD572C500E69F87 /* controls */,
 				298660FF1AD4797300807E5E /* background1.png */,
-				298660F91AD4637B00807E5E /* knob@2x.png */,
-				298660F71AD4637300807E5E /* base@2x.png */,
 				297026FA1AD454B3007789FD /* man */,
 			);
 			name = Images;
+			sourceTree = "<group>";
+		};
+		29CA2ACE1AD572C500E69F87 /* controls */ = {
+			isa = PBXGroup;
+			children = (
+				29CA2ACF1AD572F700E69F87 /* a_button.png */,
+				298660F91AD4637B00807E5E /* knob@2x.png */,
+				298660F71AD4637300807E5E /* base@2x.png */,
+			);
+			name = controls;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -284,6 +298,7 @@
 				297026FE1AD454B3007789FD /* man1.png in Resources */,
 				297026C91AD4478C007789FD /* Images.xcassets in Resources */,
 				298661001AD4797300807E5E /* background1.png in Resources */,
+				29CA2AD01AD572F700E69F87 /* a_button.png in Resources */,
 				298660FA1AD4637B00807E5E /* knob@2x.png in Resources */,
 				297026C01AD4478C007789FD /* Level1.sks in Resources */,
 				297026C71AD4478C007789FD /* Main.storyboard in Resources */,
@@ -314,6 +329,7 @@
 				297026C21AD4478C007789FD /* GameScene.swift in Sources */,
 				298660EC1AD4633C00807E5E /* CGVector+Extensions.swift in Sources */,
 				298660F21AD4633C00807E5E /* SKTAudio.swift in Sources */,
+				29CA2AD21AD573D100E69F87 /* ButtonControl.swift in Sources */,
 				298660EA1AD4633C00807E5E /* CGFloat+Extensions.swift in Sources */,
 				298660F11AD4633C00807E5E /* SKNode+Extensions.swift in Sources */,
 				298660F31AD4633C00807E5E /* SKTEffects.swift in Sources */,
