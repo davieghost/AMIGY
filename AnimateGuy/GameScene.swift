@@ -19,8 +19,8 @@ class GameScene: SKScene, AnalogControlPositionChange, ButtonPress {
   var backgroundLayer: SKSpriteNode!
   
   // character
-  let man = SKSpriteNode(imageNamed: "man1.png")
-  var manScale = CGFloat(0.5)
+  let man = SKSpriteNode(imageNamed: "man0")
+  var manScale = CGFloat(0.75)
   var velocity = CGPointZero
   var manAnimation: SKAction!
   var manTextures: [SKTexture] = []
@@ -33,6 +33,8 @@ class GameScene: SKScene, AnalogControlPositionChange, ButtonPress {
   
   override func didMoveToView(view: SKView) {
     
+    backgroundLayer = childNodeWithName("backgroundLayer") as SKSpriteNode
+    
     // set up playableRect
     let maxAspectRatio: CGFloat = 16.0 / 9.0
     let playableHeight = size.width / maxAspectRatio
@@ -40,34 +42,28 @@ class GameScene: SKScene, AnalogControlPositionChange, ButtonPress {
     playableRect = CGRect(x: 0, y: playableMargin, width: size.width, height: playableHeight)
     
     // set up edge loop
-    let physicsRect = CGRect(x: 0, y: playableRect.minY + 10, width: playableRect.width, height: 3 * playableRect.height)
+    let physicsRect = CGRect(x: 0,
+                             y: playableRect.minY + 10,
+                             width: playableRect.width,
+                             height: 3 * playableRect.height)
     physicsBody = SKPhysicsBody(edgeLoopFromRect: physicsRect)
-    
-    // set up background
-//    let background = SKSpriteNode(imageNamed: "background1")
-//    background.size = size
-//    background.anchorPoint = CGPointZero
-//    background.position = CGPointZero
-//    addChild(background)
-    
-    backgroundLayer = childNodeWithName("backgroundLayer") as SKSpriteNode
     
     // set up man
     man.setScale(manScale)
     man.position = CGPoint(x: 400, y: 240)
     man.zPosition = 100
+    man.lightingBitMask = 1
     addChild(man)
     man.physicsBody = SKPhysicsBody(rectangleOfSize: man.size)
     man.physicsBody?.restitution = 0.0
+    man.physicsBody?.usesPreciseCollisionDetection = true
     
-    // set up manTextures for animation
-    for i in 1...3 {
+    // set up walking animation
+    for i in 2...12 {
       manTextures.append(SKTexture(imageNamed: "man\(i)"))
     }
-    
-    
-    
-    manAnimation = getAnimation()
+    manAnimation = SKAction.repeatActionForever(
+      SKAction.animateWithTextures(manTextures, timePerFrame: 0.08))
     
     if debugOn { debugDrawPlayableArea(view) }
   }
@@ -91,6 +87,9 @@ class GameScene: SKScene, AnalogControlPositionChange, ButtonPress {
     
     // move the man
     moveSprite(man, velocity: velocity)
+    
+    // adjust background layer position.y
+  //  backgroundLayer.position.y = -0.3 * (man.position.y - 230.5)
   }
   
   ///////////////// TOUCH HANDLING ///////////////////
@@ -101,9 +100,7 @@ class GameScene: SKScene, AnalogControlPositionChange, ButtonPress {
 //    sceneTouched(touchLocation)
   }
   
-  func sceneTouched(touchLocation: CGPoint) {
-//    moveToward(touchLocation)
-  }
+  func sceneTouched(touchLocation: CGPoint) {}
   
   //////////////////////////// GENERAL SPRITE MOVEMENT ////////////////////////////
   
@@ -123,12 +120,6 @@ class GameScene: SKScene, AnalogControlPositionChange, ButtonPress {
   //////////////////////////// MAN ////////////////////////////
   
   // ANIMATION FUNCTIONS
-  func getAnimation() -> SKAction {
-    let time = 0.2
-    return SKAction.repeatActionForever(
-      SKAction.animateWithTextures(manTextures, timePerFrame: time))
-  }
-  
   func startAnimation() {
     if man.actionForKey("animation") == nil {
       man.runAction(
@@ -139,7 +130,7 @@ class GameScene: SKScene, AnalogControlPositionChange, ButtonPress {
   
   func stopAnimation() {
     man.removeActionForKey("animation")
-    man.texture = SKTexture(imageNamed: "man1")
+    man.texture = SKTexture(imageNamed: "man0")
   }
   
   // MOVE
@@ -154,14 +145,14 @@ class GameScene: SKScene, AnalogControlPositionChange, ButtonPress {
   func jump() {
     man.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 1200))
     
-    let airRotations = 2.0
+    let airRotations = 1.0
     let duration = 1.0
     
     let rotationDirection = man.xScale > 0 ? CGFloat(-2 * airRotations * M_PI) : CGFloat(2 * airRotations * M_PI)
     let rotate = SKAction.rotateByAngle(rotationDirection, duration: duration)
     let shrink = SKAction.sequence([
-      SKAction.scaleBy(0.5, duration: duration / 2),
-      SKAction.scaleBy(2.0, duration: duration / 2)])
+      SKAction.scaleBy(0.8, duration: duration / 2),
+      SKAction.scaleBy(1.25, duration: duration / 2)])
     let rotateAndShrink = SKAction.group([rotate, shrink])
     man.runAction(rotateAndShrink, withKey: "jumping")
   }
@@ -174,6 +165,21 @@ class GameScene: SKScene, AnalogControlPositionChange, ButtonPress {
   func uncrouch() {
     crouched = false
     man.yScale *= 2
+  }
+  
+  func throw() {
+    let projectile = SKSpriteNode(imageNamed: "a_button")
+    projectile.position.x = man.position.x + projectile.size.width / 2
+    projectile.position.y = man.position.y + 30
+    projectile.size = CGSize(width: 50, height: 50)
+    addChild(projectile)
+    
+    projectile.physicsBody = SKPhysicsBody(circleOfRadius: CGFloat(projectile.size.width / 2))
+    projectile.runAction(
+      SKAction.sequence([
+        SKAction.runBlock({projectile.physicsBody!.applyImpulse(CGVector(dx: 50, dy: 70))}),
+        SKAction.waitForDuration(10),
+        SKAction.removeFromParent()]))
   }
   
   ///////////////// CONTROL PAD ///////////////////
@@ -218,9 +224,7 @@ class GameScene: SKScene, AnalogControlPositionChange, ButtonPress {
   
   func buttonPressed(buttonControl: ButtonControl, buttonLetter: Character) {
    // println("Button pressed = \(buttonLetter)")
-    if man.actionForKey("jumping") == nil {
-      jump()
-    }
+    throw()
   }
   
   ////////////////// DEBUGGING //////////////////

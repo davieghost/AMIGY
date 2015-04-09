@@ -27,7 +27,7 @@ class GameViewController: UIViewController {
       // debugging
   //    skView.showsFPS = true
   //    skView.showsNodeCount = true
-      skView.showsPhysics = true
+    //  skView.showsPhysics = true
       
       // an optimization
       skView.ignoresSiblingOrder = true
